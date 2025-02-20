@@ -1,5 +1,5 @@
 import os
-import sys
+import argparse
 
 import torch
 from dotenv import load_dotenv
@@ -8,8 +8,7 @@ from huggingface_hub import hf_hub_download
 load_dotenv()
 HF_READ_TOKEN = os.environ.get("HF_READ_TOKEN")
 
-MODELS_DIR = "checkpoints"
-REPO_ID = "wmatejuk/piano-gpt2"
+MODELS_DIR = "."
 
 
 def download_model(repo_id, filename):
@@ -35,16 +34,18 @@ def load_model(model_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python -m scripts.download_one_model.py <model_filename>")
-        sys.exit(1)
+    # Usage: python -m scripts.download_model <model_path/in_repo> <optional> --repo user/repo
+    parser = argparse.ArgumentParser(description="Download a model from Hugging Face Hub.")
+    parser.add_argument("filename", type=str, help="Model filename to download")
+    parser.add_argument("--repo", type=str, default="epr-labs/piano-gpt", help="Hugging Face repository ID")
 
-    model_filename = sys.argv[1]
+    args = parser.parse_args()
 
+    # NOTE: This could also be an argument, leaving as is for now
     os.makedirs(MODELS_DIR, exist_ok=True)
 
-    local_path = download_model(REPO_ID, model_filename)
+    local_path = download_model(args.repo, args.filename)
     if local_path:
-        print(f"Downloaded model: {model_filename}")
+        print(f"Downloaded model: {args.filename}")
     else:
-        print(f"Failed to download model: {model_filename}")
+        print(f"Failed to download model: {args.filename}")

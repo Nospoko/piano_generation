@@ -1,8 +1,7 @@
 import torch
 import pandas as pd
 from torch import nn
-from midi_tokenizers import ExponentialTimeTokenizer
-from midi_trainable_tokenizers import AwesomeMidiTokenizer
+from midi_tokenizers import AwesomeMidiTokenizer, ExponentialTimeTokenizer
 
 from .base_generator import MidiGenerator
 

@@ -1,6 +1,18 @@
 import re
 
 placeholder_tokens = [f"<SENTINEL_{idx}>" for idx in range(64)]
+dataset_tokens = [
+    "<MAESTRO>",
+    "<PIJAMA>",
+    "<VGMIDI>",
+    "<MUSIC-NET>",
+    "<PIANO-MIDI-DE>",
+    "<LAKH-LMD-FULL>",
+    "<GIANT-MIDI>",
+    "<IMSLP>",
+    "<ATEPP-1.1>",
+    "<PIANO_FOR_AI>",
+]
 composer_tokens = [
     "<SCRIABIN>",
     "<FRANCK>",

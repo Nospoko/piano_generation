@@ -2,8 +2,7 @@ import torch
 import numpy as np
 import pandas as pd
 from torch import nn
-from midi_tokenizers import ExponentialTimeTokenizer
-from midi_trainable_tokenizers import AwesomeMidiTokenizer
+from midi_tokenizers import AwesomeMidiTokenizer, ExponentialTimeTokenizer
 
 from piano_generation import Task
 from piano_generation.generation.generators.base_generator import MidiGenerator

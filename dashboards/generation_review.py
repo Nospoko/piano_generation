@@ -11,8 +11,7 @@ import streamlit as st
 import streamlit_pianoroll
 from omegaconf import OmegaConf
 from streamlit.errors import DuplicateWidgetID
-from midi_tokenizers import ExponentialTimeTokenizer
-from midi_trainable_tokenizers import AwesomeMidiTokenizer
+from midi_tokenizers import AwesomeMidiTokenizer, ExponentialTimeTokenizer
 
 from dashboards.components import download_button
 from piano_generation import Task, RepeatingModel

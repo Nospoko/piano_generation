@@ -1,5 +1,5 @@
+from .model.gpt2 import GPT
 from .generation.tasks import Task
-from .model.gpt2 import GPT, GPTConfig
 from .model.dummy import DummyModel, RepeatingModel
 from .generation.generators import MidiGenerator, NextTokenGenerator, SeqToSeqIterativeGenerator, SeqToSeqTokenwiseGenerator
 
@@ -12,5 +12,4 @@ __all__ = [
     "DummyModel",
     "RepeatingModel",
     "GPT",
-    "GPTConfig",
 ]

@@ -1,14 +1,13 @@
 import torch
 from omegaconf import OmegaConf, DictConfig
-from midi_tokenizers import ExponentialTimeTokenizer
-from midi_trainable_tokenizers import AwesomeMidiTokenizer
+from midi_tokenizers import AwesomeMidiTokenizer, ExponentialTimeTokenizer
 
-from piano_generation import GPT, GPTConfig
+from piano_generation import GPT
 from piano_generation.artifacts import special_tokens
 
 
 def load_cfg(checkpoint: dict) -> DictConfig:
-    train_config = checkpoint["config"]
+    train_config = checkpoint["run_config"]
     return OmegaConf.create(train_config)
 
 
@@ -17,42 +16,24 @@ def load_checkpoint(checkpoint_path: str, device: str):
     return checkpoint
 
 
-def load_tokenizer(cfg: DictConfig):
-    if "tokenizer" in cfg:
-        if "tokenizer_parameters" in cfg.tokenizer:
-            tokenizer_parameters = OmegaConf.to_container(cfg.tokenizer.tokenizer_parameters)
-        else:
-            tokenizer_parameters = OmegaConf.to_container(cfg.tokenizer.parameters)
-        tokenizer_parameters |= {"special_tokens": special_tokens}
-        if "name" in cfg.tokenizer:
-            name = cfg.tokenizer.name
-        elif "tokenizer" in cfg.tokenizer:
-            name = cfg.tokenizer.tokenizer
-        if name == "AwesomeMidiTokenizer":
-            min_time_unit = tokenizer_parameters["min_time_unit"]
-            n_velocity_bins = tokenizer_parameters["min_velocity_bins"]
-            tokenizer_path = f"pretrained/awesome_tokenizers/awesome-tokenizer-{min_time_unit}-{n_velocity_bins}.json"
-            return AwesomeMidiTokenizer.from_file(tokenizer_path)
-        else:
-            return ExponentialTimeTokenizer(**tokenizer_parameters)
+def load_tokenizer(
+    cfg: DictConfig,
+    special_tokens: list[str],
+):
+    tokenizer_options = OmegaConf.to_container(cfg.tokenizer)
+    tokenizer_config = tokenizer_options["config"]
+    if tokenizer_options["class_name"] == "ExponentialTimeTokenizer":
+        tokenizer = ExponentialTimeTokenizer.build_tokenizer(tokenizer_config=tokenizer_config)
+        tokenizer.add_special_tokens(special_tokens=special_tokens)
+        return tokenizer
     else:
-        tokenizer_parameters = OmegaConf.to_container(cfg.data.tokenizer_parameters)
-        tokenizer_parameters |= {"special_tokens": special_tokens}
-
-        if cfg.data.tokenizer == "AwesomeMidiTokenizer":
-            min_time_unit = tokenizer_parameters["min_time_unit"]
-            n_velocity_bins = tokenizer_parameters["min_velocity_bins"]
-            tokenizer_path = f"pretrained/awesome_tokenizers/awesome-tokenizer-{min_time_unit}-{n_velocity_bins}.json"
-            return AwesomeMidiTokenizer.from_file(tokenizer_path)
-        else:
-            return ExponentialTimeTokenizer(**tokenizer_parameters)
+        raise NotImplementedError(f"Unknown class name: {tokenizer_options.class_name}")
 
 
 def initialize_gpt_model(
     cfg: DictConfig,
     checkpoint: dict,
     device: torch.device,
-    pad_token_id: int = 0,
 ) -> GPT:
     """
     Initializes the GPT model using the given configurations and checkpoint.
@@ -66,22 +47,13 @@ def initialize_gpt_model(
     Returns:
         GPT: The initialized GPT model.
     """
-    model_args = {
-        "n_layer": cfg.model.n_layer,
-        "n_head": cfg.model.n_head,
-        "n_embd": cfg.model.n_embd,
-        "block_size": cfg.data.sequence_length,
-        "bias": cfg.model.bias,
-        "vocab_size": None,
-        "dropout": cfg.model.dropout,
-    }
+    tokenizer = ExponentialTimeTokenizer.from_dict(checkpoint["tokenizer_desc"])
 
-    checkpoint_model_args = checkpoint["model_args"]
-    for k in ["n_layer", "n_head", "n_embd", "block_size", "bias", "vocab_size"]:
-        model_args[k] = checkpoint_model_args[k]
-
-    gptconf = GPTConfig(**model_args)
-    model = GPT(gptconf, pad_token_id=pad_token_id)
+    model = GPT(
+        config=cfg.model,
+        pad_token_id=tokenizer.pad_token_id,
+        vocab_size=tokenizer.vocab_size,
+    )
     state_dict = checkpoint["model"]
 
     unwanted_prefix = "_orig_mod."

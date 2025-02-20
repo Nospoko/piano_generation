@@ -5,8 +5,7 @@ from contextlib import nullcontext
 
 import torch
 import pandas as pd
-from midi_tokenizers import ExponentialTimeTokenizer
-from midi_trainable_tokenizers import AwesomeMidiTokenizer
+from midi_tokenizers import AwesomeMidiTokenizer, ExponentialTimeTokenizer
 
 from piano_generation import GPT
 from piano_generation.artifacts import get_composer_token

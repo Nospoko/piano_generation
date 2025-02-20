@@ -5,8 +5,7 @@ from contextlib import nullcontext
 
 import torch
 import pandas as pd
-from midi_tokenizers import ExponentialTimeTokenizer
-from midi_trainable_tokenizers import AwesomeMidiTokenizer
+from midi_tokenizers import AwesomeMidiTokenizer, ExponentialTimeTokenizer
 
 from piano_generation import GPT, Task
 from piano_generation.generation.tasks import task_map
@@ -93,7 +92,6 @@ def main(model_path: str, device: str, tasks: List[str], generator_type: str):
         cfg=cfg,
         checkpoint=checkpoint,
         device=device,
-        pad_token_id=tokenizer.pad_token_id,
     )
 
     ptdtype = {"float32": torch.float32, "bfloat16": torch.bfloat16, "float16": torch.float16}[cfg.system.dtype]

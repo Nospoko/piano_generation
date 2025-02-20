@@ -90,10 +90,9 @@ def main():
                 model_tokens = selected_models["total_tokens"].tolist()
                 model_best_val_loss = selected_models["best_val_loss"]
                 model_train_loss = selected_models["train_loss"]
-
                 selected_model_params = st.selectbox(
                     label="Select tokens",
-                    options=zip(model_tokens, model_best_val_loss, model_train_loss),
+                    options=[params for params in zip(model_tokens, model_best_val_loss, model_train_loss)],
                     format_func=format_model_params,
                 )
                 selected_model_tokens = selected_model_params[0]
